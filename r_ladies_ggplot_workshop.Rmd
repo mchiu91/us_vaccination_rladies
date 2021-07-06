@@ -18,8 +18,51 @@ library(choroplethrMaps)
 ```
 
 ## Data Visualization using _ggplot2_ package
+### Comparing *most recent vaccination versus cases in the United States*
 
-```{r data, message = FALSE}
+```{r vaccination_1, message = FALSE}
+### Data Visualization with ggplot2
+### Map of confirmed COVID-19 cases
+
+## read covid-19 dataset into R and assign it to an object
+## source https://github.com/owid/covid-19-data
+covid_raw <- read_csv("data/us_state_vaccinations.csv")
+View(covid_raw)
+
+# filter by date
+today_covid <- 
+  covid_raw %>% 
+  filter(date=='2021-06-28') %>% 
+  select(location, people_fully_vaccinated_per_hundred)
+
+# convert states to lowercase to match reference map
+today_covid$location <- tolower(today_covid$location)
+
+# rename column names and ny state to match reference map
+colnames(today_covid) <- c('region','value')
+today_covid$region <- 
+  plyr::revalue(today_covid$region, c("new york state" = "new york"))
+
+# read map into R and assign it to an object
+us_map <- map_data("state")
+
+# merge vaccination data with map long/lat columns
+today_covid_map <- merge(us_map, today_covid, by = "region")
+
+ggplot(today_covid_map, aes(long, lat, group = group)) +
+  geom_polygon(aes(group=group, fill = value), color = "white") +
+  scale_fill_viridis_c(option = "B") +
+  theme_void() +
+  guides(colour = guide_legend()) +
+  labs(title = "State-by-state Vaccination Across the United States",
+       subtitle = "Data from the Centers for Disease Control and Prevention",
+       fill = "People fully vaccinated per hundred") +
+  theme(legend.title = element_text(size = 20), legend.position = "bottom",
+    text = element_text(color = "#22211d", size = 20),
+    panel.background = element_rect(fill = "#ffffff", color = NA),
+    legend.background = element_rect(fill = "#ffffff", color = NA))
+```
+```{r vaccination, message = FALSE}
 ### Data Visualization with ggplot2
 ### Map of confirmed COVID-19 cases
 
