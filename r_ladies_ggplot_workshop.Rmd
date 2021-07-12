@@ -107,10 +107,11 @@ covid_map_2
 ```
 
 ## Built-in Challenge: Choose your own adventure
-We'll be using built-in state dataset **state.x77** from Base R (R documentation [here](https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/state))
+We'll be using **state.x77** matrix built-in "state" data sets from Base R (R documentation [here](https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/state))
 ```{r builtin-challenge, message = FALSE}
-# Take the state.x77 data and use either/both 
-# ggplot2 and choropleth to make a plot
+# state.x77
+# plot mean number of days with minimum temperature below freezing (1931-1960)
+# using choroplethr or ggplot or both!
 
 # Example
 # take the state.x77 matrix, make it into

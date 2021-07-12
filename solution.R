@@ -6,7 +6,6 @@
 # convert dataset into format usable for state_choropleth
 state_frost_plot <- as.data.frame(state.x77[,"Frost",drop=F]) %>%
   rownames_to_column("region") %>%
-  rename(value = Frost) %>%
   mutate(region = tolower(region))
 
 # plot using state_choropleth
@@ -24,11 +23,11 @@ us_map <- map_data("state")
 state_frost_plot2 <- merge(us_map, state_frost_plot, by = "region")
 
 # plot
-# note that parameter labels are included for ease of interpretation (can be removed)
-# geom_map inherits data from previous ggplot layer; included for interpretability
+# Note: parameter labels are included for ease of interpretation (can be removed)
+# geom_map inherits data from previous ggplot layer
 ggplot(data = state_frost_plot2, 
        aes(x = long, y = lat)) + 
-  geom_map(data = state_frost_plot2, map = us_map, 
+  geom_map(map = us_map, 
            aes(fill = value, map_id = region), color = "white") +
   scale_fill_viridis(name = "mean # of days", option = "D") +
   # coord_map("polyconic") # coordinate map with map curvature; mapproj pkg
