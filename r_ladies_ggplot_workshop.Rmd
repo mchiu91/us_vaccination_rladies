@@ -69,21 +69,17 @@ today_covid_map <- merge(us_map, today_covid, by = "region")
 ## Data Visualization using _ggplot2_ package
 
 ```{r plot-1, warning = FALSE}
-covid_map_1 <- 
-  ggplot(data = today_covid_map, 
-         aes(x = long, y = lat, group = group, fill = value)) +
-  geom_polygon(color = "white") + # white state borders
-  scale_fill_viridis_c(option = "D") +
+covid_map_1 <- ggplot(data = today_covid_map, 
+                      aes(x = long, y = lat)) + 
+  geom_map(data = today_covid_map, map = us_map, 
+           aes(fill = value, map_id = region), color = "white") +
+  scale_fill_viridis(name = "fully vaccinated per 100 population", option = "D") +
   theme_void() +
   labs(title = "State-by-state Vaccination Across the US",
-       caption = "Data from the Centers for Disease Control and Prevention",
-       fill = "People fully vaccinated per hundred") +
-  theme(text = element_text(color = "#22211d", size = 16),
-        legend.title = element_text(size = 14), 
-        legend.position = "bottom",
-        panel.background = element_rect(fill = "#ffffff", color = NA),
-        legend.background = element_rect(fill = "#ffffff", color = NA)) 
-# + coord_fixed(ratio = 1.1) # uncomment and adjust the x to y ratio
+       subtitle = "Data from the Centers for Disease Control and Prevention (June 28th, 2021)") +
+  theme(text = element_text(size = 20),
+        legend.title = element_text(size = 14),
+        legend.position = 'right')
 
 covid_map_1
 ```
