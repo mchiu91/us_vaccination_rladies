@@ -45,9 +45,10 @@ today_covid <-
   select(location, people_fully_vaccinated_per_hundred)
 head(today_covid)
 
-# read reference map into R and assign it to an object
+# map_data function from 'ggplot2' uses name of map provided by 'maps' package
+# import us state map and assign it to an object
 us_map <- map_data("state")
-head(us_map) # peek at the reference map data
+head(us_map) # peek at the us state map data
 ```
 
 Next, we will tweak the _location_ variables from the COVID-19 dataset **today_covid** so they match **us_map**, then merge by region to make our final 'master' data **today_covid_map** that will be used in plotting.
@@ -69,18 +70,20 @@ today_covid_map <- merge(us_map, today_covid, by = "region")
 
 ```{r plot-1, warning = FALSE}
 covid_map_1 <- 
-  ggplot(today_covid_map, aes(long, lat, group = group)) +
-  geom_polygon(aes(group = group, fill = value), color = "white") +
+  ggplot(data = today_covid_map, 
+         aes(x = long, y = lat, group = group, fill = value)) +
+  geom_polygon(color = "white") + # white state borders
   scale_fill_viridis_c(option = "D") +
   theme_void() +
-  guides(colour = guide_legend()) +
-  labs(title = "State-by-state Vaccination Across the United States",
+  labs(title = "State-by-state Vaccination Across the US",
        caption = "Data from the Centers for Disease Control and Prevention",
        fill = "People fully vaccinated per hundred") +
-  theme(legend.title = element_text(size = 14), legend.position = "bottom",
-    text = element_text(color = "#22211d", size = 16),
-    panel.background = element_rect(fill = "#ffffff", color = NA),
-    legend.background = element_rect(fill = "#ffffff", color = NA))
+  theme(text = element_text(color = "#22211d", size = 16),
+        legend.title = element_text(size = 14), 
+        legend.position = "bottom",
+        panel.background = element_rect(fill = "#ffffff", color = NA),
+        legend.background = element_rect(fill = "#ffffff", color = NA)) 
+# + coord_fixed(ratio = 1.1) # uncomment and adjust the x to y ratio
 
 covid_map_1
 ```
@@ -98,8 +101,8 @@ covid_map_1
 
 # us vaccination
 covid_map_2 <- state_choropleth(today_covid,
-                                title = "State-by-state vaccination across the United States",
-                                legend = "People fully vaccinated per hundred",
+                                title = "State-by-state vaccination across the US",
+                                legend = "Fully vaccinated per 100 population",
                                 num_colors = 1)
 covid_map_2
 # 5 quantiles, zoom in on vector of states
@@ -107,28 +110,19 @@ covid_map_2
 #                  zoom = c("new york", "pennsylvania", "new jersey"))
 ```
 
+## Built-in Challenge: Choose your own adventure
+We'll be using built-in state dataset **state.x77** from Base R (R documentation [here](https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/state))
 ```{r builtin-challenge, message = FALSE}
-## Find other state data
-
-### There are other places to find state-level data that might be interesting. The US census: https://www.census.gov/data/datasets.html
-
-### Base R even has some built-in state data: https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/state
-
-# need to take the state.x77 matrix and make it into
-# something that state_choropleth can use
-
-# Could ask participants to take the state.x77 data and use either/both 
+# Take the state.x77 data and use either/both 
 # ggplot2 and choropleth to make a plot
-# See below for an example "solution"
 
-
+# Example
+# take the state.x77 matrix, make it into
+# something that state_choropleth can use
 state_murder_plot <- as.data.frame(state.x77[,"Murder",drop=F]) %>%
   rownames_to_column("region") %>%
   rename(value = Murder) %>%
   mutate(region = tolower(region))
 
-state_choropleth(state_murder_plot,
-                 title = "murder and non-negligent manslaughter rate",
-                 legend = "per 100,000 population (1976)",
-                 num_colors = 1)
+
 ```
