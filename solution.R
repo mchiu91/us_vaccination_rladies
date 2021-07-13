@@ -6,6 +6,7 @@
 # convert dataset into format usable for state_choropleth
 state_frost_plot <- as.data.frame(state.x77[,"Frost",drop=F]) %>%
   rownames_to_column("region") %>%
+  rename(value = Frost) %>%
   mutate(region = tolower(region))
 
 # plot using state_choropleth
