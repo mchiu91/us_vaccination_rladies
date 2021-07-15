@@ -5,15 +5,15 @@ date: "7/14/2021"
 output: html_document
 ---
 
-```{r setup, message = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Packages
+### Required Packages
 
 ```{r packages, message = FALSE}
-# install any missing packages as needed
-# install.packages(c("readr", "tidyverse", "ggplot2", "viridis", "choroplethr"))
+# uncomment below to install any missing packages as needed
+# install.packages(c("readr", "tidyverse", "ggplot2", "viridis", "choroplethr", "maps"))
 
 # load packages
 library(readr)
@@ -22,16 +22,16 @@ library(ggplot2)
 library(viridis)
 library(choroplethr)
 library(choroplethrMaps)
+library(maps)
 ```
 
-## Dataset
+### COVID-19 Vaccination Data
 
-You can find the dataset **us_state_vaccinations.csv** inside the _data_ folder or download it directly from [Data on COVID-19 vaccinations by Our World in Data](https://github.com/owid/covid-19-data).
+You can import the dataset **us_state_vaccinations.csv** from the data folder (downloaded on June 28, 2021) or download the most up-to-date version from [Data on COVID-19 vaccinations by Our World in Data](https://github.com/owid/covid-19-data).
 
-### Importing and Cleaning the data
+#### Cleaning the data
 
-After importing the raw data, filter by _date_, then select the relevant variables _location_ and _people_fully_vaccinated_per_hundred_ and assign to a new object **today_covid**.
-Read in our US state data and assign it to an object **us_map**, which has *long* and *lat* (longitude and latitude) variables used in outlining our US state map.
+Filter by 'date' and select the variables we will be plotting: 'location' and 'people_fully_vaccinated_per_hundred'
 
 ```{r data, message = FALSE}
 # read covid-19 dataset into R and assign it to an object
@@ -44,14 +44,18 @@ today_covid <-
   filter(date=='2021-06-28') %>% 
   select(location, people_fully_vaccinated_per_hundred)
 head(today_covid)
+```
 
+Read in the the US state map and assign it to an object **us_map**. The 'long' and 'lat' (longitude and latitude) columns will be used to generate our US state map.
+
+```{r state_map, message = FALSE}
 # map_data function from 'ggplot2' uses name of map provided by 'maps' package
 # import us state map and assign it to an object
 us_map <- map_data("state")
 head(us_map) # peek at the us state map data
 ```
 
-Next, we will tweak our **today_covid** dataframe to fit the required format for state_choroplethr, then merge by "region" to make our final 'master' data **today_covid_map** that will be used in both ggplot2 and choroplethr map visuals.
+Next, we will tweak our **today_covid** dataframe to fit the format required for [state_choroplethr](https://arilamstein.com/documentation/choroplethr/reference/state_choropleth.html) function, then merge by 'region' to make our final dataframe **today_covid_map** that will be used in both [ggplot2](https://ggplot2.tidyverse.org/) and [choroplethr](https://arilamstein.com/packages/) map visuals.
 
 ```{r maps, message = FALSE}
 # convert states to lowercase to match reference map
@@ -66,11 +70,14 @@ today_covid$region <-
 today_covid_map <- merge(us_map, today_covid, by = "region")
 ```
 
-## Data Visualization using _ggplot2_ package
+### Mapping COVID-19 vaccination across the US
 
-```{r plot-1, warning = FALSE, results = 'asis'}
-ggplot(data = today_covid_map, 
-       aes(x = long, y = lat)) + 
+#### Using [ggplot2](https://ggplot2.tidyverse.org/)
+
+```{r plot-1, warning = FALSE}
+ggplot_map <- 
+  ggplot(data = today_covid_map, 
+         aes(x = long, y = lat)) + 
   geom_map(data = today_covid_map, map = us_map, 
            aes(fill = value, map_id = region)) +
   scale_fill_viridis(name = "fully vaccinated per 100 population",
@@ -82,23 +89,28 @@ ggplot(data = today_covid_map,
         legend.title = element_text(size = 14),
         legend.position = 'right')
 
+ggplot_map
+
 ```
 
-## Data Visualization using _choroplethr_ package
+#### Using [choroplethr](https://arilamstein.com/documentation/choroplethr/reference/)
 
 ```{r plot-2, warning = FALSE}
 # note that state_choropleth parameters do not require us_map
-state_choropleth(today_covid,
-                 title = "State-by-state vaccination across the US",
-                 legend = "Fully vaccinated per 100 population",
-                 num_colors = 1)
+choroplethr_map <- 
+  state_choropleth(today_covid,
+                   title = "State-by-state vaccination across the US",
+                   legend = "Fully vaccinated per 100 population",
+                   num_colors = 1)
 
+choroplethr_map
 # 5 quantiles, zoom in on vector of states
 # state_choropleth(today_covid, num_colors = 5,
 #                  zoom = c("new york", "pennsylvania", "new jersey"))
 ```
 
-## Built-in Challenge: Choose your own adventure
+### Built-in Challenge: Choose your own adventure
+
 We'll be using **state.x77** matrix built-in "state" data sets from Base R (R documentation [here](https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/state)).
 Check out solution.R script in the project repository for one (possible) set of solutions for the challenge.
 
