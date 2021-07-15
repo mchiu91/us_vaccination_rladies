@@ -31,11 +31,10 @@ ggplot(data = state_frost_plot2,
   geom_map(map = us_map, 
            aes(fill = value, map_id = region), color = "white") +
   scale_fill_viridis(name = "mean # of days", option = "D") +
-  # coord_map("polyconic") # coordinate map with map curvature; mapproj pkg
-  # theme_map() # clean theme for displaying maps; ggthemes pkg
+  # coord_map("polyconic") + # coordinate map with map curvature; mapproj pkg
+  # ggthemes::theme_map() # clean theme for displaying maps; ggthemes pkg
   labs(title = "Average Days with Minimum Temp. Below Freezing in Capital or Large City",
        subtitle = "(1931-1960)") +
   theme(text = element_text(size = 16),
         legend.title = element_text(size = 14),
-        legend.position = 'right') +
-  theme_void()
+        legend.position = 'right') + theme_void()

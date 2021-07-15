@@ -1,7 +1,7 @@
 ---
 title: "Mapping US Vaccination Data in R"
 author: "Michelle Chiu"
-date: "7/6/2021"
+date: "7/14/2021"
 output: html_document
 ---
 
@@ -21,7 +21,7 @@ library(tidyverse)
 library(ggplot2)
 library(viridis)
 library(choroplethr)
-# library(choroplethrMaps)
+library(choroplethrMaps)
 ```
 
 ## Dataset
@@ -31,12 +31,12 @@ You can find the dataset **us_state_vaccinations.csv** inside the _data_ folder 
 ### Importing and Cleaning the data
 
 After importing the raw data, filter by _date_, then select the relevant variables _location_ and _people_fully_vaccinated_per_hundred_ and assign to a new object **today_covid**.
-Read in our US state data and assign it to an object **us_map**, which has _long_ and _lat_ (longitude and latitude) variables used in outlining our US state map.
+Read in our US state data and assign it to an object **us_map**, which has *long* and *lat* (longitude and latitude) variables used in outlining our US state map.
 
 ```{r data, message = FALSE}
 # read covid-19 dataset into R and assign it to an object
 covid_raw <- read_csv("data/us_state_vaccinations.csv")
-# head(covid_raw)
+head(covid_raw)
 
 # filter by date and select relevant variables
 today_covid <- 
@@ -51,7 +51,7 @@ us_map <- map_data("state")
 head(us_map) # peek at the us state map data
 ```
 
-Next, we will tweak the _location_ variables from the COVID-19 dataset **today_covid** so they match **us_map**, then merge by region to make our final 'master' data **today_covid_map** that will be used in plotting.
+Next, we will tweak our **today_covid** dataframe to fit the required format for state_choroplethr, then merge by "region" to make our final 'master' data **today_covid_map** that will be used in both ggplot2 and choroplethr map visuals.
 
 ```{r maps, message = FALSE}
 # convert states to lowercase to match reference map
@@ -68,12 +68,13 @@ today_covid_map <- merge(us_map, today_covid, by = "region")
 
 ## Data Visualization using _ggplot2_ package
 
-```{r plot-1, warning = FALSE}
-covid_map_1 <- ggplot(data = today_covid_map, 
-                      aes(x = long, y = lat)) + 
+```{r plot-1, warning = FALSE, results = 'asis'}
+ggplot(data = today_covid_map, 
+       aes(x = long, y = lat)) + 
   geom_map(data = today_covid_map, map = us_map, 
-           aes(fill = value, map_id = region), color = "white") +
-  scale_fill_viridis(name = "fully vaccinated per 100 population", option = "D") +
+           aes(fill = value, map_id = region)) +
+  scale_fill_viridis(name = "fully vaccinated per 100 population",
+                     option = "D") +
   theme_void() +
   labs(title = "State-by-state Vaccination Across the US",
        subtitle = "Data from the Centers for Disease Control and Prevention (June 28th, 2021)") +
@@ -81,33 +82,26 @@ covid_map_1 <- ggplot(data = today_covid_map,
         legend.title = element_text(size = 14),
         legend.position = 'right')
 
-covid_map_1
 ```
 
 ## Data Visualization using _choroplethr_ package
 
 ```{r plot-2, warning = FALSE}
-## Data Visualization using choroplethr
+# note that state_choropleth parameters do not require us_map
+state_choropleth(today_covid,
+                 title = "State-by-state vaccination across the US",
+                 legend = "Fully vaccinated per 100 population",
+                 num_colors = 1)
 
-# example using existing data from base R
-# data(df_pop_state)
-# state_choropleth(df_pop_state,
-#                  title  = "US 2012 State Population Estimates", 
-#                  legend = "Population")
-
-# us vaccination
-covid_map_2 <- state_choropleth(today_covid,
-                                title = "State-by-state vaccination across the US",
-                                legend = "Fully vaccinated per 100 population",
-                                num_colors = 1)
-covid_map_2
 # 5 quantiles, zoom in on vector of states
 # state_choropleth(today_covid, num_colors = 5,
 #                  zoom = c("new york", "pennsylvania", "new jersey"))
 ```
 
 ## Built-in Challenge: Choose your own adventure
-We'll be using **state.x77** matrix built-in "state" data sets from Base R (R documentation [here](https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/state))
+We'll be using **state.x77** matrix built-in "state" data sets from Base R (R documentation [here](https://www.rdocumentation.org/packages/datasets/versions/3.6.2/topics/state)).
+Check out solution.R script in the project repository for one (possible) set of solutions for the challenge.
+
 ```{r builtin-challenge, message = FALSE}
 # Take the state.x77 data
 # plot using choroplethr or ggplot or both
