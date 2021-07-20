@@ -58,16 +58,29 @@ head(us_map) # peek at the us state map data
 Next, we will tweak our **today_covid** dataframe to fit the format required for [state_choroplethr](https://arilamstein.com/documentation/choroplethr/reference/state_choropleth.html) function, then merge by 'region' to make our final dataframe **today_covid_map** that will be used in both [ggplot2](https://ggplot2.tidyverse.org/) and [choroplethr](https://arilamstein.com/packages/) map visuals.
 
 ```{r maps, message = FALSE}
+#### more 'manual' solution ####
 # convert states to lowercase to match reference map
 today_covid$location <- tolower(today_covid$location)
-
-# rename column names and ny state to match reference map
+# rename column names
 colnames(today_covid) <- c('region','value')
-today_covid$region <- 
-  plyr::revalue(today_covid$region, c("new york state" = "new york"))
+
+# look at diff b/w regions in our dataset vs. state.regions
+setdiff(today_covid$region, state.regions$region)
+# rename ny state to match reference map
+today_covid$region <- plyr::revalue(today_covid$region, 
+                c("new york state" = "new york"))
 
 # merge vaccination data with map long/lat columns
 today_covid_map <- merge(us_map, today_covid, by = "region")
+
+#### alternative solution using mapvalues function ####
+# load dataset from choroplethrMaps library
+library(choroplethrMaps)
+data(state.regions)
+today_covid$region <- plyr::mapvalues(today_covid$region,
+                                      from = state.regions$abb,
+                                      to = state.regions$region)
+setdiff(today_covid$region, state.regions$region) # sanity check
 ```
 
 ### Mapping COVID-19 vaccination across the US
